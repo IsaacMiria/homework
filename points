@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jun  6 23:28:59 2020
+
+@author: Isaac.Miria
+"""
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt 
+
+df = pd.DataFrame(pd.read_excel('ready.xls'))
+
+# Draw Stripplot
+fig, ax = plt.subplots(figsize=(16,10), dpi= 80)    
+#colors = ['#ff7473','#ffad60','#feee7d','#9dd3a8','#96ceb4','#60c5ba','#7bdff2','#d5a4cf','#ffb6b9','#FFEBE7']
+#,color = colors
+sns.stripplot(df.地点.astype(str), df.薪资.astype(float),edgecolor = 'gray',ax = ax,jitter=0.25,size=8,linewidth=.5)
+
+# Decorations
+plt.title('The salary in 10 cities (10 thousands per month)', fontsize=22)
+plt.savefig('The salary in 10 cities.jpg',dpi=500)
+plt.show()
