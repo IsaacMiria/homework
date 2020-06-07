@@ -1,0 +1,41 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun  7 15:34:18 2020
+
+@author: Isaac.Miria
+"""
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.DataFrame(pd.read_excel('ready.xls'))
+
+def draw_a_bing(Str):
+    color = ['#a39391','#716e77','#ecd6c7','#e79686','#fcebb6','#FDFDEB']
+    values=[]
+    for i in range(0,6):
+        if i<5:
+            b = df.loc[(df['地点'] == Str)&((i<df['薪资'].astype(float))&(df['薪资'].astype(float)<=i+1)),['招聘职位','公司','地点','薪资','爬取日期']].薪资.count()
+        else:
+            b = df.loc[(df['地点'] == Str)&(5.00<df['薪资'].astype(float)),['招聘职位','公司','地点','薪资','爬取日期']].薪资.count()
+        values.append(b)
+        #plt.rcParams['font.sans-serif']='SimHei'#设置中文显示
+    plt.figure(figsize=(6,6))#将画布设定为正方形，则绘制的饼图是正圆
+    label=['less than 10,000 RMB','10,000-20,000 RMB','20,000-30,000 RMB','30,000-40,000 RMB','40,000-50,000 RMB','more than 50,000 RMB']#定义饼图的标签，标签是列表
+    explode=[0.01,0.01,0.01,0.01,0.01,0.01]#设定各项距离圆心n个半径
+
+    plt.pie(values,explode=explode,labels=label,autopct='%1.1f%%',colors = color)#绘制饼图
+    plt.title('The salary in '+Str)#绘制标题
+    plt.savefig(Str+'.png',dpi=500)#保存图片
+    plt.show()
+
+draw_a_bing('Beijing')
+draw_a_bing('Shanghai')
+draw_a_bing('Guangzhou')
+draw_a_bing('Shenzhen')
+draw_a_bing('Wuhan')
+draw_a_bing('Hangzhou')
+draw_a_bing('Suzhou')
+draw_a_bing('Chengdu')
+draw_a_bing('Chongqing')
+draw_a_bing('Nanjing')
