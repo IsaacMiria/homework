@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun  7 16:54:04 2020
+
+@author: Isaac.Miria
+"""
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+df = pd.DataFrame(pd.read_excel('ready.xls'))
+
+city =['Wuhan','Chongqing','Suzhou','Nanjing','Beijing',\
+        'Chengdu','Guangzhou','Hangzhou','Shenzhen','Shanghai']
+values = []
+def get_sum(Str):
+    b = df.loc[(df['地点'] == Str),['招聘职位','公司','地点','薪资','爬取日期']].薪资.count()
+    values.append(b)
+    return values
+    
+values = get_sum('Beijing')
+values = get_sum('Shanghai')
+values = get_sum('Guangzhou')
+values = get_sum('Shenzhen')
+values = get_sum('Wuhan')
+values = get_sum('Hangzhou')
+values = get_sum('Suzhou')
+values = get_sum('Chengdu')
+values = get_sum('Chongqing')
+values = get_sum('Nanjing')
+
+values.sort()
+
+fig,ax = plt.subplots(figsize=(12,10), facecolor='white', dpi= 80)
+ax.vlines(x=city, ymin=0, ymax=values, color='firebrick', alpha=0.7, linewidth=22)
+ax.set_title('The quantity of job in ten Cities', fontdict={'size':22})
+ax.set(ylabel='The quantity of job', ylim=(0,275))
+plt.xticks(city, rotation=60, horizontalalignment='right', fontsize=12)
+
+# Annotate
+k=0
+for i in city:
+    ax.text(i,values[k]+2,values[k], horizontalalignment='center')
+    k+=1
+
+p1 = patches.Rectangle((.44, -0.005), width=.462, height=.13, alpha=.1, facecolor='#d4edf4',transform=fig.transFigure)
+p2 = patches.Rectangle((.124, -0.005), width=.316, height=.13, alpha=.1, facecolor='#FFF5C3', transform=fig.transFigure)
+fig.add_artist(p1)
+fig.add_artist(p2)
+plt.savefig('Jobcounts.png',dpi=500)
+plt.show()
