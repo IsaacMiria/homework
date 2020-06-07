@@ -1,0 +1,195 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun May 31 23:28:34 2020
+
+@author: Isaac.Miria
+
+"""
+
+#--------------------------------爬取并写入excel-------------------------------
+import urllib.request
+import re
+import xlwt#用来创建excel文档并写入数据
+import xlrd#
+
+def get_content(urlstr,page):
+    Url =urlstr+ str(page)+'.html'
+    a = urllib.request.urlopen(Url)#打开网址
+    html = a.read().decode('gbk')#读取源代码并转为unicode
+    return html
+
+def get(html):
+    reg = re.compile(r'class="t1 ">.*? <a target="_blank" title="(.*?)".*? <span class="t2"><a target="_blank" title="(.*?)".*?<span class="t3">(.*?)</span>.*?<span class="t4">(.*?)</span>.*? <span class="t5">(.*?)</span>',re.S)#匹配换行符
+    #t1:职位名，t2公司名，t3地点，t4薪资，t5时间
+    items = re.findall(reg,html)#items是元组
+    return items
+
+def sheet_write(sheet,items,index):#爬取到的内容写入excel表格
+    for item in items:#职位信息
+        for i in range(0,5):
+            #print item[i]
+            sheet.write(index,i,item[i])#行，列，数据
+        print(index)
+        index+=1
+        
+def excel_write(url,index):
+    for each in range(1,6):
+        Index = (each-1)*50+1+index
+        sheet_write(sheet1,get(get_content(url,each)),Index)
+    return Index+50
+
+newTable="trytry.xls"#表格名称
+wb = xlwt.Workbook(encoding='utf-8')#创建excel文件，声明编码
+sheet1 = wb.add_sheet('data',cell_overwrite_ok=True)#创建表格
+headData = ['招聘职位','公司','地点','薪资','爬取日期']#表头部信息
+for colnum in range(0, 5):
+    sheet1.write(0, colnum, headData[colnum], xlwt.easyxf('font: bold on'))  # 行，列
+
+index = 0
+for level in range(4,12):
+    #北京上海广州深圳武汉
+    urlp = 'https://search.51job.com/list/010000%252C020000%252C030200%252C040000%252C180200,000000,0000,00,9,'+str(level)+',python,2,' 
+    urld = 'https://search.51job.com/list/010000%252C020000%252C030200%252C040000%252C180200,000000,7500,00,9,'+str(level)+',%2520,2,'
+    #杭州苏州成都重庆南京
+    urly = 'https://search.51job.com/list/060000%252C090200%252C080200%252C070200%252C070300,000000,0000,00,9,'+str(level)+',python,2,'
+    urla = 'https://search.51job.com/list/060000%252C090200%252C080200%252C070200%252C070300,000000,7500,00,9,'+str(level)+',%2520,2,'
+    index = excel_write(urlp,index)
+    index = excel_write(urld,index)
+    index = excel_write(urly,index)  
+    index = excel_write(urla,index)
+wb.save(newTable)
+
+#-----------------------------excel数据处理:-----------------------------------
+import numpy as np
+import pandas as pd
+df = pd.DataFrame(pd.read_excel('trytry.xls'))
+
+df = df.dropna(how='any')#删除空行和缺失数据
+
+beijing = ['北京','北京-昌平区','北京-朝阳区','北京-大兴区','北京-丰台区','北京海淀区',\
+               '北京-石景山区','北京-顺义区','北京-西城区','北京-海淀区','北京-东城区']
+shanghai = ['上海','上海-宝山区','上海-虹口区','上海-黄浦区','上海-嘉定区','上海-静安区',\
+            '上海-闵行区','上海-浦东新区','上海-普陀区','上海-青浦区','上海-松江区',\
+            '上海-徐汇区','上海-杨浦区','上海-长宁区']
+guangzhou = ['广州','广州-白云区','广州-番禺区','广州-海珠区','广州-黄埔区','广州-增城区'\
+             '广州-荔湾区','广州-南沙区','广州-天河区','广州-越秀区','广州-花都区']
+shenzhen = ['深圳','深圳-宝安区','深圳-福田区','深圳-光明新区','深圳-龙岗区',\
+            '深圳-龙华新区','深圳-罗湖区','深圳-南山区','深圳-坪山区']
+hangzhou = ['杭州','杭州-滨江区','杭州-富阳区','杭州-拱墅区','杭州-江干区','杭州-临安区',\
+            '杭州-上城区','杭州-西湖区','杭州-下城区','杭州-萧山区','杭州-余杭区']
+suzhou = ['苏州','苏州-高新区','苏州-工业园区','苏州-姑苏区',\
+          '苏州-吴江区','苏州-吴中区','苏州-相城区']
+nanjing = ['南京','南京-鼓楼区','南京-建邺区','南京-江宁区','南京-六合区','南京-浦口区',\
+           '南京-栖霞区','南京-秦淮区','南京-玄武区','南京-雨花台区']
+chengdu = ['成都','成都-成华区','成都-高新区','成都-金牛区','成都-锦江区','成都-郫都区','成都-青羊区',\
+           '成都-双流区','成都-天府新区','成都-温江区','成都-武侯区','成都-简阳区']
+chongqing = ['重庆','重庆-璧山区','重庆-江北区','重庆-九龙坡区','重庆-南岸区',\
+             '重庆-南川区','重庆-沙坪坝区','重庆-渝北区','重庆-渝中区','重庆-江津区']
+wuhan = ['武汉','武汉-东湖新技...','武汉-洪山区','武汉-江汉区','武汉-江夏区',\
+         '武汉-硚口区','武汉-青山区','武汉-武昌区']
+#统一城市名称
+df['地点']=df['地点'].replace(beijing, 'Beijing')
+df['地点']=df['地点'].replace(shanghai,'Shanghai' )
+df['地点']=df['地点'].replace(guangzhou, 'Guangzhou')
+df['地点']=df['地点'].replace(shenzhen, 'Shenzhen')
+df['地点']=df['地点'].replace(hangzhou, 'Hangzhou')
+df['地点']=df['地点'].replace(suzhou, 'Suzhou')
+df['地点']=df['地点'].replace(nanjing, 'Nanjing')
+df['地点']=df['地点'].replace(chengdu, 'Chengdu')
+df['地点']=df['地点'].replace(chongqing, 'Chongqing')
+df['地点']=df['地点'].replace(wuhan, 'Wuhan')
+df['地点']=df['地点'].replace('异地招聘','ERROR')
+#剔除错误值
+df = df.loc[~df['地点'].str.contains('ERROR')]
+#剔除无关数据
+df = df.loc[~df['招聘职位'].str.contains('专员|文员|数据员|实习|助理|辅导|老师|测试|人力|测试员|运维|运营|录入员|区域|销售|市场|培训|土地|物流|芯片|会计|品牌')]
+#统一薪资单位：万/月
+List = list(df['薪资'])
+for i in List:
+    i = str(i)
+    n = i.find('-')
+    m = i.find('/')
+    if n==-1:
+        average = (float(i[:m-1]))*3/1000
+    else:
+        low = float(i[:n])
+        high = float(i[n+1:m-1])
+        average = (low+high)/2
+        if i[-3:]=='万/年':
+            average = average/12
+        elif i[-3:]=='千/月':
+            average = average/10
+        average = round(average,2)
+    df['薪资'] = df['薪资'].replace(i,average)
+
+#剔除重复值
+df = df.drop_duplicates(subset = ['招聘职位','公司'], keep = 'first')
+
+df = df.dropna(how='any')
+    
+df.to_excel('ready.xls',index=False,header=True)
+
+#df.to_excel('trytry.xls',index_label = 'No.' ,header=True)
+#print(df.info())
+
+#-----------------------------------提取职位------------------------------------
+
+def strs(row):
+    values = "";
+    for i in range(len(row)):
+        if i == len(row) - 1:
+            values = values + str(row[i])
+        else:
+            values = values + str(row[i]) + ","
+    return values
+
+def dealwith(f,table):
+    nrows = table.nrows  # 行数
+    for ronum in range(1, nrows):
+        row = table.row_values(ronum,0,1)
+        values = strs(row) # 条用函数，将行数据拼接成字符串
+        f.writelines(values + "\r") #将字符串写入新文件
+        
+data = xlrd.open_workbook("ready.xls")
+f = open("job.txt", "w+",encoding='utf-8') 
+table = data.sheets()[0]
+dealwith(f,table)
+
+f.close() 
+
+#-----------------------------------生成词云---------------------------------
+import jieba
+import cv2
+from matplotlib import colors
+from wordcloud import WordCloud
+
+excludes={'北京' ,'上海','广州','深圳','武汉','杭州','苏州','成都','重庆','南京',\
+          '五险','一金','双休','奖金','班车','地点','直聘','诚聘','少儿','周末'}
+
+color_list = {'#7bdff2','#ff7473','#60c5ba','#ffb6b9','#d5a4cf','#3b8686'}
+colormap=colors.ListedColormap(color_list)
+colormask=cv2.imread("background.jpg")
+
+f = open("job.txt","r",encoding='utf-8')
+txt = f.read()
+f.close()
+words = jieba.lcut(txt)
+newtxt = " ".join(words)
+wordcloud=WordCloud(
+                    scale = 6,\
+                    #清晰度就靠你了,越大越清晰
+                    background_color = "white",\
+                    mode = "RGBA",\
+                    colormap = colormap ,\
+                    mask = colormask,\
+                    width = 800,\
+                    height = 800,\
+                    font_step = 2,\
+                    font_path = "C:\Windows\Fonts\msyhbd.ttc",\
+                    max_words = 250,\
+                    max_font_size = 80,\
+                    relative_scaling = 0.3,\
+                    #调密集程度，默认为0.5，当值为1时，表示双倍的数量会用双倍的字体大小显示
+                    stopwords = excludes,\
+                    ).generate(newtxt)
+wordcloud.to_file("jobcloud.png") 
