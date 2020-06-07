@@ -1,0 +1,52 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun  7 18:11:43 2020
+
+@author: Isaac.Miria
+"""
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+df = pd.DataFrame(pd.read_excel('ready.xls'))
+
+city = ['Beijing','Shanghai','Guangzhou','Shenzhen','Wuhan','Hangzhou',\
+        'Suzhou','Chengdu','Chongqing','Nanjing']
+values = []
+def get_average(Str):
+    a = np.mean(df.loc[(df['地点'] == Str),['招聘职位','公司','地点','薪资','爬取日期']].薪资) 
+    values.append(round(a,2))
+    return values
+
+values = get_average('Beijing')
+values = get_average('Shanghai')
+values = get_average('Guangzhou')
+values = get_average('Shenzhen')
+values = get_average('Wuhan')
+values = get_average('Hangzhou')
+values = get_average('Suzhou')
+values = get_average('Chengdu')
+values = get_average('Chongqing')
+values = get_average('Nanjing')    
+
+fig, ax = plt.subplots(figsize=(16,10), dpi= 80)
+ax.vlines(x=city, ymin=0, ymax=values, color='firebrick', alpha=0.7, linewidth=2)
+ax.scatter(x=city, y=values, s=75, color='firebrick', alpha=0.7)
+
+# Title, Label, Ticks and Ylim
+ax.set_title('The average salary of 10 cities', fontdict={'size':22})
+ax.set_ylabel('Miles Per Gallon')
+ax.set_xticks(city)
+ax.set_xticklabels(city, rotation=60, fontdict={'horizontalalignment': 'right', 'size':12})
+ax.set_ylim(0, 4.0)
+
+# Annotate
+k=0
+for i in city:
+    ax.text(i,values[k]+0.08,values[k], horizontalalignment='center')
+    k+=1
+    
+plt.savefig('Jobaverage.png',dpi=500)
+plt.show()
+
